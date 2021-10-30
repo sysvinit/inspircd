@@ -82,9 +82,17 @@ class SSLCertExt : public ExtensionItem
 		}
 		else
 		{
+			std::string start, end;
+
 			getline(s,cert->fingerprint,' ');
 			getline(s,cert->dn,' ');
-			getline(s,cert->issuer,'\n');
+			getline(s,cert->issuer,' ');
+
+			getline(s,start,' ');
+			getline(s,end,'\n');
+
+			cert->starttime = ConvToNum<time_t>(start);
+			cert->endtime = ConvToNum<time_t>(end);
 		}
 	}
 
@@ -162,6 +170,8 @@ class CommandSSLInfo : public SplitCommand
 			source->WriteNotice("*** Distinguished Name: " + cert->GetDN());
 			source->WriteNotice("*** Issuer:             " + cert->GetIssuer());
 			source->WriteNotice("*** Key Fingerprint:    " + cert->GetFingerprint());
+			source->WriteNotice("*** Valid from:         " + InspIRCd::TimeString(cert->GetStartTime(), "%Y-%m-%dT%H:%M:%S%z", true));
+			source->WriteNotice("*** Expires:            " + InspIRCd::TimeString(cert->GetEndTime(), "%Y-%m-%dT%H:%M:%S%z", true));
 		}
 	}
 

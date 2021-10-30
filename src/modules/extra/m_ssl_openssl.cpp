@@ -679,6 +679,15 @@ class OpenSSLIOHook : public SSLIOHook
 			certinfo->error = "Not activated, or expired certificate";
 		}
 
+		struct tm notbefore, notafter;
+		if (ASN1_TIME_to_tm(X509_getm_notBefore(cert), &notbefore) == 0 ||
+			ASN1_TIME_to_tm(X509_getm_notAfter(cert), &notafter) == 0 ||
+			(certinfo->starttime = mktime(&notbefore)) == (time_t) -1 ||
+			(certinfo->endtime = mktime(&notafter)) == (time_t) -1)
+		{
+			certinfo->error = "Could not parse certificate validity start or end time";
+		}
+
 		X509_free(cert);
 	}
 

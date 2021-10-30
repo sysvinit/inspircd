@@ -29,6 +29,7 @@
 #pragma once
 
 #include <string>
+#include <time.h>
 #include "iohook.h"
 
 /** ssl_cert is a class which abstracts TLS (SSL) certificate
@@ -46,9 +47,10 @@ class ssl_cert : public refcountbase
 	std::string issuer;
 	std::string error;
 	std::string fingerprint;
+	time_t starttime, endtime;
 	bool trusted, invalid, unknownsigner, revoked;
 
-	ssl_cert() : trusted(false), invalid(true), unknownsigner(true), revoked(false) {}
+	ssl_cert() : starttime(0), endtime(0), trusted(false), invalid(true), unknownsigner(true), revoked(false) {}
 
 	/** Get certificate distinguished name
 	 * @return Certificate DN
@@ -81,6 +83,23 @@ class ssl_cert : public refcountbase
 	const std::string& GetFingerprint()
 	{
 		return fingerprint;
+	}
+
+	/** Get certificate validity start time.
+	 * @return The time at which the certificate becomes valid.
+	 */
+	time_t GetStartTime()
+	{
+		return starttime;
+	}
+
+	/** Get certificate validity end time.
+	 * @return The time at which the certificate ceases being
+	 * valid.
+	 */
+	time_t GetEndTime()
+	{
+		return endtime;
 	}
 
 	/** Get trust status
@@ -146,7 +165,8 @@ class ssl_cert : public refcountbase
 		if (hasError)
 			value << GetError();
 		else
-			value << GetFingerprint() << " " << GetDN() << " " << GetIssuer();
+			value << GetFingerprint() << " " << GetDN() << " " << GetIssuer()
+				<< " " << GetStartTime() << " " << GetEndTime();
 		return value.str();
 	}
 };
